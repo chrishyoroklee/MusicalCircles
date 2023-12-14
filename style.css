@@ -1,0 +1,59 @@
+body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /* To hide scrollbars */
+  font-family: 'Roboto Mono', sans-serif; /* Set a default font */
+}
+
+#overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgb(27, 233, 110, 0.01);
+  display: flex;
+  flex-direction: column;
+  justify-content: start;
+  align-items: start;
+  transition: opacity 0.5s ease; /* Add transition for smooth opacity change */
+  opacity: 0.8; /* Initially visible */
+  pointer-events: auto; /* Enable pointer events */
+}
+
+#title,
+#instructions,
+#startButton {
+  color: rgb(3, 86, 60);
+  text-align: center;
+  margin: 10px;
+}
+
+.hidden {
+  opacity: 0; /* Make the overlay transparent */
+  pointer-events: none; /* Disable pointer events on hidden overlay */
+}
+/* Styles for drum buttons */
+.drum-buttons {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.drum-buttons button {
+  margin: 0 10px;
+  padding: 4px 8px;
+  background-color: #34db7f;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+
+
+/* Style for active state of drum buttons */
+.drum-buttons button.active {
+  background-color: #ff5733; /* Change to the desired color for the active state */
+}

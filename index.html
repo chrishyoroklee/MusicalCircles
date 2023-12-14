@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Meta tags, title, fonts, and styles-->
+    <link rel="stylesheet" href="/style.css"> 
+</head>
+<body>
+    <div id="overlay">
+        <h1 id="title">Welcome to your Virtual Musical World</h1>
+        <p id="instructions">Click the button below to start exploring!</p>
+        <button id="startButton">Start the Virtual World</button>
+    <!-- Drum buttons -->
+    <div class="drum-buttons">
+        <button id="snareButton" onclick="playSnareDrumLoop()" data-key="c">C for Kick</button>
+        <button id="bassButton" onclick="playBassDrumLoop()" data-key="v">V for Snare</button>
+        <button id="hatButton" onclick="playHatLoop()" data-key="k">K for Hi-Hat</button>
+        <button id="cymbalButton" onclick="playCymbalLoop()" data-key="j">J for Hi-Hat</button>
+        <button id="conga1Button" onclick="playConga1Loop()" data-key="w">W for Conga 1</button>
+        <button id="conga2Button" onclick="playConga2Loop()" data-key="e">E for Conga 2</button>
+    </div>
+    </div>
+
+    <!-- Canvas element for rendering the 3D scene -->
+    <canvas id="bg"></canvas>
+    
+    <!-- Add the Tone.js library-->
+    <script src="https://cdn.jsdelivr.net/npm/tone"></script> 
+
+    <!-- Link your JavaScript file as a module -->
+    <script src="/main.js" type="module"></script>
+    <!-- <script src="drums.js" type="module"></script> -->
+
+    <script>
+        // Function to initialize the audio context and start the virtual world
+        function initializeAudioAndStartWorld() {
+            initializeAudioContext();
+            startVirtualWorld();
+        }
+
+       // Function to initialize the audio context
+       function initializeAudioContext() {
+            console.log("Initializing Audio Context check")
+            if (Tone.context.state !== 'running') {
+                Tone.start().then(() => {
+                    console.log('Tone.js context started');
+                }).catch((err) => {
+                    console.error('Tone.js context error:', err);
+                });
+            } else {
+                console.log('Tone.js context already running');
+            }
+        }
+
+
+        // Event listener to initialize the virtual world on button click
+        window.addEventListener('DOMContentLoaded', () => {
+            console.log("DOM content loading check")
+            document.getElementById('startButton').addEventListener('click', initializeAudioAndStartWorld);
+        });
+
+        // Add event listeners for keyboard inputs
+        window.addEventListener('keydown', (event) => {
+            const key = event.key.toLowerCase();
+            const drumButton = document.querySelector(`.drum-buttons button[data-key="${key}"]`);
+            if (drumButton) {
+                drumButton.classList.add('active');
+                // Call the respective function when a drum button is pressed via keyboard
+                drumButton.click(); // Simulate a click on the drum button
+            }
+        });
+
+        window.addEventListener('keyup', (event) => {
+            const key = event.key.toLowerCase();
+            const drumButton = document.querySelector(`.drum-buttons button[data-key="${key}"]`);
+            if (drumButton) {
+                drumButton.classList.remove('active');
+            }
+        });
+    </script>
+</body>
+</html>

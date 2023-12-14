@@ -1,8 +1,14 @@
 import * as Tone from 'tone';
+import kick1 from './kick1.wav';
+import snare1 from './snare1.wav';
+import hat1 from './hat1.wav';
+import cymbal1 from './cymbal1.wav';
+import conga1 from './conga1.wav';
+import conga2 from './conga2.wav';
 
 // Function to play the bass drum loop
 export function playBassDrumLoop(volume = 0) {
-  const bassDrum = new Tone.Player('kick1.wav').toDestination();
+  const bassDrum = new Tone.Player(kick1).toDestination();
   bassDrum.autostart = true;
 
   bassDrum.volume.value = volume; // Adjust the volume level here
@@ -15,7 +21,7 @@ export function playBassDrumLoop(volume = 0) {
 }
 // Function to play the snare drum loop
 export function playSnareDrumLoop(volume = 0) {
-    const snareDrum = new Tone.Player('snare1.wav').toDestination();
+    const snareDrum = new Tone.Player(snare1).toDestination();
     snareDrum.autostart = true;
   
     snareDrum.volume.value = volume; // Adjust the volume level here
@@ -29,7 +35,7 @@ export function playSnareDrumLoop(volume = 0) {
   
 // Function to play the hi-hat drum loop
 export function playHatLoop(volume = -8) {
-    const hiHat = new Tone.Player('hat1.wav').toDestination();
+    const hiHat = new Tone.Player(hat1).toDestination();
     hiHat.autostart = true;
 
     hiHat.volume.value = volume; // Adjust the volume level here
@@ -42,7 +48,7 @@ export function playHatLoop(volume = -8) {
   }
 // Function to play the cymbal drum loop
 export function playCymbalLoop(volume = -8) {
-    const cymbal = new Tone.Player('cymbal1.wav').toDestination();
+    const cymbal = new Tone.Player(cymbal1).toDestination();
     cymbal.autostart = true;
 
     cymbal.volume.value = volume; // Adjust the volume level here
@@ -56,7 +62,7 @@ export function playCymbalLoop(volume = -8) {
 
 // Function to play the conga1 drum loop
 export function playConga1Loop(volume = -8) {
-    const conga1 = new Tone.Player('conga1.wav').toDestination();
+    const conga1 = new Tone.Player(conga1).toDestination();
     conga1.autostart = true;
 
     conga1.volume.value = volume; // Adjust the volume level here
@@ -69,7 +75,7 @@ export function playConga1Loop(volume = -8) {
   }
 // Function to play the conga2 drum loop
 export function playConga2Loop(volume = -8) {
-    const conga2 = new Tone.Player('conga2.wav').toDestination();
+    const conga2 = new Tone.Player(conga2).toDestination();
     conga2.autostart = true;
 
     conga2.volume.value = volume; // Adjust the volume level here

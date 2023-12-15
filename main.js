@@ -13,13 +13,13 @@ let activeVoices = {}; // To manage active voices for polyphony
 
 // Function to create the Tone.js synth
 function createSynth() {
-  toneSynth = new Tone.Synth().toDestination();
+  return new Tone.Synth().toDestination();
 }
 
 // Function to initialize audio context and start the virtual world
 function initializeAudioAndStartWorld() {
   Tone.start().then(() => {
-    createSynth();
+    toneSynth = createSynth(); // Assign the created synth to toneSynth
     startVirtualWorld(); // Start the 3D virtual world after audio context is initialized
   }).catch((err) => {
     console.error('Tone.js context error:', err);
@@ -197,64 +197,127 @@ function startVirtualWorld() {
     }
   });
 
-  // Event listener to play/stop sound on sphere click and control synth parameters while dragging
-draggableSpheres.forEach(sphere => {
-  sphere.addEventListener('click', (event) => {
-    event.stopPropagation();
+//   // Event listener for sphere click and synth control during dragging
+// draggableSpheres.forEach(sphere => {
+//   sphere.addEventListener('click', (event) => {
+//     event.stopPropagation();
 
-    if (Tone.context.state === 'running') {
-      if (!toneSynth) {
-        createSynth();
-        toneSynth.start();
-      }
+//     if (Tone.context.state === 'running') {
+//       if (!toneSynth) {
+//         createSynth();
+//         toneSynth.start();
+//       }
 
-      const sphereId = sphere.uuid;
+//       const sphereId = sphere.uuid;
 
-      if (!sphereState[sphereId] || sphereState[sphereId] === 'released') {
-        const freq = Math.abs(mouse.x * 1000); // Map mouse.x to frequency
-        const volume = Math.abs(mouse.y); // Map mouse.y to volume
+//       if (!sphereState[sphereId] || sphereState[sphereId] === 'released') {
+//         const freq = Math.abs(mouse.x * 1000);
+//         const volume = Math.abs(mouse.y);
 
-        // Trigger a new voice
-        const newVoice = toneSynth.triggerAttack(freq, '+0', volume);
-        activeVoices[sphereId] = newVoice;
+//         // Trigger a new voice
+//         const newVoice = toneSynth.triggerAttack(freq, '+0', volume);
+//         activeVoices.push({ id: sphereId, voice: newVoice });
 
-        sphereState[sphereId] = 'triggered';
-      } else if (sphereState[sphereId] === 'triggered') {
-        // Release the voice associated with this sphere
-        if (activeVoices[sphereId]) {
-          toneSynth.triggerRelease(activeVoices[sphereId]);
-          delete activeVoices[sphereId];
-        }
-        sphereState[sphereId] = 'released';
-      }
-    } else {
-      console.error('Tone.js context not started yet.');
-    }
-  });
+//         sphereState[sphereId] = 'triggered';
+//       } else if (sphereState[sphereId] === 'triggered') {
+//         // Release all voices associated with this sphere
+//         activeVoices
+//           .filter((voiceObj) => voiceObj.id === sphereId)
+//           .forEach((voiceObj) => toneSynth.triggerRelease(voiceObj.voice));
+      
+//         // Remove released voices from the activeVoices array
+//         activeVoices = activeVoices.filter((voiceObj) => voiceObj.id !== sphereId);
+      
+//         sphereState[sphereId] = 'released';
+//       }
+//     } else {
+//       console.error('Tone.js context not started yet.');
+//     }
+//   });
+//   // Event listener to control synth parameters while dragging
+//   sphere.addEventListener('mousemove', (event) => {
+//     if (selectedSphere === sphere) {
+//       // Calculate movement offsets
+//       const dx = event.clientX - initialPosition.x;
+//       const dy = event.clientY - initialPosition.y;
+//       const dz = sphere.position.z - initialPosition.z;
 
-    // Event listener to control synth parameters while dragging
-    sphere.addEventListener('mousemove', (event) => {
-      if (selectedSphere === sphere) {
-        // Calculate movement offsets
-        const dx = event.clientX - initialPosition.x;
-        const dy = event.clientY - initialPosition.y;
-        const dz = sphere.position.z - initialPosition.z;
+//       // Calculate frequency and amplitude based on movement
+//       const frequencyOffset = dx * 0.1; // Adjust the frequency scaling factor
+//       const amplitudeOffset = dz * 0.01; // Adjust the amplitude scaling factor
 
-        // Calculate frequency and amplitude based on movement
-        const frequencyOffset = dx * 0.1; // Adjust the frequency scaling factor
-        const amplitudeOffset = dz * 0.01; // Adjust the amplitude scaling factor
+//       // Update synth parameters (frequency and amplitude)
+//       if (toneSynth) {
+//         const newFrequency = Tone.Frequency('C4').transpose(frequencyOffset);
+//         toneSynth.frequency.rampTo(newFrequency, 0.1); // Smoothly change the frequency
+//         toneSynth.volume.rampTo(-Math.abs(amplitudeOffset), 0.1); // Smoothly change the amplitude
 
-        // Update synth parameters (frequency and amplitude)
-        if (toneSynth) {
-          const newFrequency = Tone.Frequency('C4').transpose(frequencyOffset);
-          toneSynth.frequency.rampTo(newFrequency, 0.1); // Smoothly change the frequency
-          toneSynth.volume.rampTo(-Math.abs(amplitudeOffset), 0.1); // Smoothly change the amplitude
+//         // Trigger a voice for the dragged sphere if dragging is in progress
+//         if (isDragging) {
+//           toneSynth.triggerAttackRelease(Math.abs(mouse.x * 900), '1n');
+//         }
+//       } else {
+//         console.error('Tone.js synth not yet initialized.');
+//       }
+//     }
+//   });
+// });
+
+    
+        // Event listener for sphere click and synth control during dragging
+    draggableSpheres.forEach(sphere => {
+      sphere.addEventListener('click', (event) => {
+        event.stopPropagation();
+
+        if (Tone.context.state === 'running') {
+          if (!toneSynth) {
+            createSynth();
+            toneSynth.start();
+          }
+
+          const sphereId = sphere.uuid;
+
+          // Trigger a new voice for each click
+          const freq = Math.abs(mouse.x * 1000);
+          const volume = Math.abs(mouse.y);
+          const newVoice = toneSynth.triggerAttack(freq, '+0', volume);
+          activeVoices.push({ id: sphereId, voice: newVoice });
+
+          sphereState[sphereId] = 'triggered';
         } else {
-          console.error('Tone.js synth not yet initialized.');
+          console.error('Tone.js context not started yet.');
         }
-      }
+      });
+
+      // Event listener to control synth parameters while dragging
+      sphere.addEventListener('mousemove', (event) => {
+        if (selectedSphere === sphere) {
+          // Calculate movement offsets
+          const dx = event.clientX - initialPosition.x;
+          const dy = event.clientY - initialPosition.y;
+          const dz = sphere.position.z - initialPosition.z;
+
+          // Calculate frequency and amplitude based on movement
+          const frequencyOffset = dx * 0.1; // Adjust the frequency scaling factor
+          const amplitudeOffset = dz * 0.01; // Adjust the amplitude scaling factor
+
+          // Update synth parameters (frequency and amplitude)
+          if (toneSynth) {
+            const newFrequency = Tone.Frequency('C4').transpose(frequencyOffset);
+            toneSynth.frequency.rampTo(newFrequency, 0.1); // Smoothly change the frequency
+            toneSynth.volume.rampTo(-Math.abs(amplitudeOffset), 0.1); // Smoothly change the amplitude
+
+            // Trigger a voice for the dragged sphere if dragging is in progress
+            if (isDragging) {
+              toneSynth.triggerAttackRelease(Math.abs(mouse.x * 900), '1n');
+            }
+          } else {
+            console.error('Tone.js synth not yet initialized.');
+          }
+        }
+      });
     });
-  });
+
 
     function onMouseMove(event) {
       mouse.x = (event.clientX / window.innerWidth) * 2 - 1;

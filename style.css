@@ -1,59 +1,306 @@
+:root {
+  --mint: #d5f5e3;
+  --forest: #03563c;
+  --forest-soft: rgba(3, 86, 60, 0.62);
+  --accent: #1fa971;
+  --accent-hot: #ff6b3d;
+  --panel: rgba(255, 255, 255, 0.72);
+  --panel-line: rgba(3, 86, 60, 0.16);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+}
+
 body {
   margin: 0;
-  padding: 0;
-  overflow: hidden; /* To hide scrollbars */
-  font-family: 'Roboto Mono', sans-serif; /* Set a default font */
+  overflow: hidden;
+  background: var(--mint);
+  color: var(--forest);
+  font-family: 'Roboto Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  -webkit-font-smoothing: antialiased;
 }
 
-#overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
+#bg {
+  position: fixed;
+  inset: 0;
+  display: block;
   width: 100%;
   height: 100%;
-  background-color: rgb(27, 233, 110, 0.01);
+  touch-action: none; /* let pointermove drive dragging on touch devices */
+}
+
+/* --------------------------------------------------------------- title card */
+
+#intro {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: radial-gradient(circle at 50% 45%, rgba(213, 245, 227, 0.9), rgba(213, 245, 227, 0.99));
+  transition: opacity 0.6s ease, visibility 0.6s ease;
+}
+
+.intro-card {
+  max-width: 34rem;
+  text-align: center;
+}
+
+.intro-card h1 {
+  margin: 0 0 0.6rem;
+  font-size: clamp(2rem, 6vw, 3.2rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.intro-lead {
+  margin: 0 auto 2rem;
+  max-width: 30rem;
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: var(--forest-soft);
+}
+
+#startButton {
+  padding: 0.85rem 2.2rem;
+  font: inherit;
+  font-weight: 500;
+  color: #fff;
+  background: var(--accent);
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: transform 0.15s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 8px 24px rgba(31, 169, 113, 0.3);
+}
+
+#startButton:hover:not(:disabled) {
+  background: #178d5e;
+  transform: translateY(-1px);
+  box-shadow: 0 12px 28px rgba(31, 169, 113, 0.36);
+}
+
+#startButton:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+#startButton:disabled {
+  opacity: 0.55;
+  cursor: progress;
+}
+
+.intro-status {
+  margin: 1.1rem 0 0;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--forest-soft);
+}
+
+/* ---------------------------------------------------------------------- HUD */
+
+#hud {
+  position: fixed;
+  inset: 0;
+  pointer-events: none; /* the scene beneath stays fully interactive */
+  transition: opacity 0.6s ease 0.15s;
+}
+
+.is-hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+#help {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  max-width: 21rem;
+  padding: 16px 18px;
+  pointer-events: auto;
+  background: var(--panel);
+  border: 1px solid var(--panel-line);
+  border-radius: 14px;
+  backdrop-filter: blur(8px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+#help h2 {
+  margin: 0 0 0.7rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--forest-soft);
+}
+
+#help ul {
+  margin: 0;
+  padding-left: 1.05rem;
+  font-size: 0.78rem;
+  line-height: 1.85;
+}
+
+#help b {
+  font-weight: 700;
+  color: var(--accent);
+}
+
+#hud.is-compact #help {
+  opacity: 0;
+  transform: translateY(-8px);
+  pointer-events: none;
+}
+
+#helpToggle {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  font: inherit;
+  font-weight: 700;
+  color: var(--forest-soft);
+  background: var(--panel);
+  border: 1px solid var(--panel-line);
+  border-radius: 50%;
+  cursor: pointer;
+  pointer-events: auto;
+  backdrop-filter: blur(8px);
+  transition: color 0.2s ease, background-color 0.2s ease;
+}
+
+#helpToggle:hover {
+  color: var(--accent);
+  background: rgba(255, 255, 255, 0.92);
+}
+
+/* --------------------------------------------------------------- drum pads */
+
+#drumPads {
+  position: absolute;
+  /* Spanning the full width rather than left:50% + translate, so shrink-to-fit
+     does not cap the row at half the viewport and wrap the pads too early. */
+  left: 0;
+  right: 0;
+  bottom: max(22px, env(safe-area-inset-bottom));
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 12px;
+  pointer-events: auto;
+}
+
+#drumPads.is-loading {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.pad {
   display: flex;
   flex-direction: column;
-  justify-content: start;
-  align-items: start;
-  transition: opacity 0.5s ease; /* Add transition for smooth opacity change */
-  opacity: 0.8; /* Initially visible */
-  pointer-events: auto; /* Enable pointer events */
-}
-
-#title,
-#instructions,
-#startButton {
-  color: rgb(3, 86, 60);
-  text-align: center;
-  margin: 10px;
-}
-
-.hidden {
-  opacity: 0; /* Make the overlay transparent */
-  pointer-events: none; /* Disable pointer events on hidden overlay */
-}
-/* Styles for drum buttons */
-.drum-buttons {
-  display: flex;
-  justify-content: center;
-  margin-top: 20px;
-}
-
-.drum-buttons button {
-  margin: 0 10px;
-  padding: 4px 8px;
-  background-color: #34db7f;
-  color: white;
-  border: none;
-  border-radius: 5px;
+  align-items: center;
+  gap: 2px;
+  min-width: 72px;
+  padding: 9px 12px;
+  font: inherit;
+  color: var(--forest);
+  background: var(--panel);
+  border: 1px solid var(--panel-line);
+  border-radius: 12px;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  user-select: none;
+  touch-action: manipulation;
+  backdrop-filter: blur(8px);
+  transition: background-color 0.12s ease, color 0.12s ease, transform 0.12s ease;
 }
 
+.pad:hover {
+  background: rgba(255, 255, 255, 0.92);
+}
 
+.pad-key {
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1;
+}
 
-/* Style for active state of drum buttons */
-.drum-buttons button.active {
-  background-color: #ff5733; /* Change to the desired color for the active state */
+.pad-label {
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.65;
+}
+
+.pad.is-held,
+.pad.is-hit {
+  color: #fff;
+  background: var(--accent-hot);
+  border-color: var(--accent-hot);
+  transform: translateY(2px) scale(0.97);
+}
+
+/* .is-hit is stamped on every trigger and fades on its own, so a held key and
+   a fast repeated tap both read clearly. */
+.pad.is-hit:not(.is-held) {
+  animation: pad-flash 0.22s ease-out forwards;
+}
+
+@keyframes pad-flash {
+  from {
+    color: #fff;
+    background: var(--accent-hot);
+    border-color: var(--accent-hot);
+    transform: translateY(2px) scale(0.97);
+  }
+  to {
+    color: var(--forest);
+    background: var(--panel);
+    border-color: var(--panel-line);
+    transform: none;
+  }
+}
+
+@media (max-width: 760px) {
+  #help {
+    top: 12px;
+    left: 12px;
+    right: 66px;
+    max-width: none;
+  }
+
+  #helpToggle {
+    top: 12px;
+    right: 12px;
+  }
+
+  #drumPads {
+    gap: 6px;
+    padding: 0 8px;
+  }
+
+  .pad {
+    min-width: 0;
+    padding: 8px 9px;
+  }
+
+  .pad-label {
+    font-size: 0.56rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }

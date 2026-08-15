@@ -1,3 +1,7 @@
+// drums.js
+// Six one-shot samples, loaded once and retriggered. The single source of
+// truth for which key plays which drum -- main.js builds the pads from it.
+
 import * as Tone from 'tone';
 import kick1 from './kick1.wav';
 import snare1 from './snare1.wav';
@@ -6,125 +10,66 @@ import cymbal1 from './cymbal1.wav';
 import conga1 from './conga1.wav';
 import conga2 from './conga2.wav';
 
-// Function to play the bass drum loop
-export function playBassDrumLoop(volume = 0) {
-  const bassDrum = new Tone.Player(kick1).toDestination();
-  bassDrum.autostart = true;
+export const DRUMS = [
+  { id: 'kick', key: 'c', label: 'Kick', url: kick1, volume: -1 },
+  { id: 'snare', key: 'v', label: 'Snare', url: snare1, volume: -3 },
+  { id: 'hat', key: 'k', label: 'Hi-Hat', url: hat1, volume: -10 },
+  { id: 'cymbal', key: 'j', label: 'Cymbal', url: cymbal1, volume: -13 },
+  { id: 'conga1', key: 'w', label: 'Conga 1', url: conga1, volume: -7 },
+  { id: 'conga2', key: 'e', label: 'Conga 2', url: conga2, volume: -7 },
+];
 
-  bassDrum.volume.value = volume; // Adjust the volume level here
+let players = null;
+let loaded = false;
 
-  bassDrum.load().then(() => {
-    console.log('Audio file loaded successfully');
-  }).catch((error) => {
-    console.error('Error loading audio file:', error);
+// Two hits scheduled at the exact same AudioContext time make Tone throw, so
+// each drum keeps its own strictly increasing cursor.
+const lastHit = new Map();
+
+export function isLoaded() {
+  return loaded;
+}
+
+/**
+ * Load every sample once and route them into the shared master node.
+ *
+ * @param {import('tone').ToneAudioNode} destination
+ * @returns {Promise<void>} resolves when all samples are decoded
+ */
+export function loadDrums(destination) {
+  if (players) return Tone.loaded();
+
+  const urls = Object.fromEntries(DRUMS.map((d) => [d.id, d.url]));
+  players = new Tone.Players({ urls }).connect(destination);
+
+  for (const drum of DRUMS) {
+    players.player(drum.id).volume.value = drum.volume;
+  }
+
+  return Tone.loaded().then(() => {
+    loaded = true;
   });
 }
-// Function to play the snare drum loop
-export function playSnareDrumLoop(volume = 0) {
-    const snareDrum = new Tone.Player(snare1).toDestination();
-    snareDrum.autostart = true;
-  
-    snareDrum.volume.value = volume; // Adjust the volume level here
 
-    snareDrum.load().then(() => {
-      console.log('Audio file loaded successfully');
-    }).catch((error) => {
-      console.error('Error loading audio file:', error);
-    });
-  }
-  
-// Function to play the hi-hat drum loop
-export function playHatLoop(volume = -8) {
-    const hiHat = new Tone.Player(hat1).toDestination();
-    hiHat.autostart = true;
+/**
+ * Trigger a drum by id. Safe to call before the samples finish loading and
+ * safe to call faster than the sample length.
+ *
+ * @param {string} id one of the DRUMS ids
+ * @returns {boolean} whether a sound was actually triggered
+ */
+export function playDrum(id) {
+  if (!loaded || !players || !players.has(id)) return false;
 
-    hiHat.volume.value = volume; // Adjust the volume level here
+  const now = Tone.now();
+  const time = Math.max(now, (lastHit.get(id) ?? 0) + 0.02);
+  lastHit.set(id, time);
 
-    hiHat.load().then(() => {
-      console.log('Audio file loaded successfully');
-    }).catch((error) => {
-      console.error('Error loading audio file:', error);
-    });
-  }
-// Function to play the cymbal drum loop
-export function playCymbalLoop(volume = -8) {
-    const cymbal = new Tone.Player(cymbal1).toDestination();
-    cymbal.autostart = true;
-
-    cymbal.volume.value = volume; // Adjust the volume level here
-
-    cymbal.load().then(() => {
-      console.log('Audio file loaded successfully');
-    }).catch((error) => {
-      console.error('Error loading audio file:', error);
-    });
-  }
-
-// Function to play the conga1 drum loop
-export function playConga1Loop(volume = -8) {
-    const conga1 = new Tone.Player(conga1).toDestination();
-    conga1.autostart = true;
-
-    conga1.volume.value = volume; // Adjust the volume level here
-
-    conga1.load().then(() => {
-      console.log('Audio file loaded successfully');
-    }).catch((error) => {
-      console.error('Error loading audio file:', error);
-    });
-  }
-// Function to play the conga2 drum loop
-export function playConga2Loop(volume = -8) {
-    const conga2 = new Tone.Player(conga2).toDestination();
-    conga2.autostart = true;
-
-    conga2.volume.value = volume; // Adjust the volume level here
-
-    conga2.load().then(() => {
-      console.log('Audio file loaded successfully');
-    }).catch((error) => {
-      console.error('Error loading audio file:', error);
-    });
-  }
-
-// Function to change button color when pressed
-export function changeButtonColor(buttonId) {
-  const button = document.getElementById(buttonId);
-
-  button.classList.add('pressed');
-  setTimeout(() => {
-    button.classList.remove('pressed');
-  }, 100);
+  players.player(id).start(time);
+  return true;
 }
-// Event listener to handle keydown events
-document.addEventListener('DOMContentLoaded', () => {
-  document.addEventListener('keydown', (event) => {
-      switch (event.key.toUpperCase()) {
-        case 'V':
-          playSnareDrumLoop();
-          changeButtonColor('snareButton');
-          break;
-        case 'C':
-          playBassDrumLoop();
-          changeButtonColor('bassButton');
-          break;
-        case 'K':
-          playHatLoop();
-          changeButtonColor('hatButton');
-          break;
-        case 'J':
-          playCymbalLoop();
-          changeButtonColor('cymbalButton');
-        case 'W':
-          playConga1Loop();
-          changeButtonColor('conga1Button');
-          break;
-        case 'E':
-          playConga2Loop();
-          changeButtonColor('conga2Button');
-          break;
-        default:
-          break;
-      }
-    });
-  });
+
+/** Look up a drum by its keyboard key, or undefined. */
+export function drumForKey(key) {
+  return DRUMS.find((d) => d.key === key);
+}

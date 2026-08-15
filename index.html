@@ -1,84 +1,51 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Chris Lee Musical World</title>
-    <!-- Meta tags, title, fonts, and styles-->
-    <link rel="stylesheet" href="/style.css"> 
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="description" content="Musical Circles: a 3D world you play by moving spheres through space.">
+    <title>Musical Circles</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;700&display=swap">
 </head>
 <body>
-    <div id="overlay">
-        <h1 id="title">Welcome to your Virtual Musical World</h1>
-        <p id="instructions">Click the button below to start exploring!</p>
-        <button id="startButton">Start the Virtual World</button>
-
-    <!-- Link your JavaScript file as a module -->
-    <script src="/main.js" type="module"></script>
-    <!-- <script src="drums.js" type="module"></script> -->
-    <!-- Drum buttons -->
-    <div class="drum-buttons">
-        <button id="snareButton" onclick="playSnareDrumLoop()" data-key="c">C for Kick</button>
-        <button id="bassButton" onclick="playBassDrumLoop()" data-key="v">V for Snare</button>
-        <button id="hatButton" onclick="playHatLoop()" data-key="k">K for Hi-Hat</button>
-        <button id="cymbalButton" onclick="playCymbalLoop()" data-key="j">J for Cymbal</button>
-        <button id="conga1Button" onclick="playConga1Loop()" data-key="w">W for Conga 1</button>
-        <button id="conga2Button" onclick="playConga2Loop()" data-key="e">E for Conga 2</button>
-    </div>
-    </div>
-
-    <!-- Canvas element for rendering the 3D scene -->
+    <!-- The 3D scene -->
     <canvas id="bg"></canvas>
-    
-    <!-- Add the Tone.js library-->
-    <script src="https://cdn.jsdelivr.net/npm/tone"></script> 
 
+    <!-- Title screen. Audio can only start from a real user gesture. -->
+    <div id="intro">
+        <div class="intro-card">
+            <h1>Musical Circles</h1>
+            <p class="intro-lead">
+                A world of a hundred spheres, each one a note. Where a sphere sits
+                decides how it sounds: higher is brighter, nearer is louder, bigger
+                is deeper.
+            </p>
+            <button id="startButton" type="button">Enter the world</button>
+            <p id="introStatus" class="intro-status">Headphones recommended</p>
+        </div>
+    </div>
 
+    <!-- In-world controls, revealed once the audio context is running -->
+    <div id="hud" class="is-hidden">
+        <button id="helpToggle" type="button" aria-label="Show or hide the instructions">?</button>
 
-    <script>
-        // Function to initialize the audio context and start the virtual world
-        function initializeAudioAndStartWorld() {
-            initializeAudioContext();
-            startVirtualWorld();
-        }
+        <div id="help">
+            <h2>How to play</h2>
+            <ul>
+                <li><b>Click</b> a sphere to sound it</li>
+                <li><b>Drag</b> it up or down to slide through the scale</li>
+                <li><b>&uarr; &darr;</b> resize the sphere under the cursor: bigger is lower and longer</li>
+                <li><b>Drag the background</b> to orbit, <b>scroll</b> to zoom</li>
+                <li><b>H</b> hides this panel</li>
+            </ul>
+        </div>
 
-       // Function to initialize the audio context
-       function initializeAudioContext() {
-            console.log("Initializing Audio Context check")
-            if (Tone.context.state !== 'running') {
-                Tone.start().then(() => {
-                    console.log('Tone.js context started');
-                }).catch((err) => {
-                    console.error('Tone.js context error:', err);
-                });
-            } else {
-                console.log('Tone.js context already running');
-            }
-        }
+        <!-- Pads are generated from the DRUMS table in drums.js -->
+        <div id="drumPads" class="is-loading" aria-label="Drum pads"></div>
+    </div>
 
-
-        // Event listener to initialize the virtual world on button click
-        window.addEventListener('DOMContentLoaded', () => {
-            console.log("DOM content loading check")
-            document.getElementById('startButton').addEventListener('click', initializeAudioAndStartWorld);
-        });
-
-        // Add event listeners for keyboard inputs
-        window.addEventListener('keydown', (event) => {
-            const key = event.key.toLowerCase();
-            const drumButton = document.querySelector(`.drum-buttons button[data-key="${key}"]`);
-            if (drumButton) {
-                drumButton.classList.add('active');
-                // Call the respective function when a drum button is pressed via keyboard
-                drumButton.click(); // Simulate a click on the drum button
-            }
-        });
-
-        window.addEventListener('keyup', (event) => {
-            const key = event.key.toLowerCase();
-            const drumButton = document.querySelector(`.drum-buttons button[data-key="${key}"]`);
-            if (drumButton) {
-                drumButton.classList.remove('active');
-            }
-        });
-    </script>
+    <script type="module" src="/main.js"></script>
 </body>
 </html>

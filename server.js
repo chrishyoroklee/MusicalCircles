@@ -1,20 +1,36 @@
-const express = require("express");
-const app = express();
-const path = require("path");
+// Static file server for the production build. Run `npm run build` first.
+
+import { existsSync } from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import express from 'express';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const dist = path.join(__dirname, 'dist');
 const PORT = process.env.PORT || 3031;
 
-// Serve static files from the 'dist' directory
-app.use(express.static(path.join(__dirname, 'dist')));
+if (!existsSync(path.join(dist, 'index.html'))) {
+  console.error('No build found in ./dist. Run `npm run build` first.');
+  process.exit(1);
+}
 
-// Define additional routes if needed
-// For example, if you have an API or other routes
+const app = express();
 
-// Serve index.html for all other routes to enable client-side routing
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+app.use(
+  express.static(dist, {
+    // Hashed asset filenames can be cached hard; index.html must not be.
+    setHeaders: (res, filePath) => {
+      if (filePath.endsWith('index.html')) res.setHeader('Cache-Control', 'no-cache');
+      else res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+    },
+  }),
+);
+
+// Everything else falls back to the app shell.
+app.use((req, res) => {
+  res.sendFile(path.join(dist, 'index.html'));
 });
 
-// Start the server
 app.listen(PORT, () => {
-  console.log(`Server started on port ${PORT}`);
+  console.log(`Musical Circles running on http://localhost:${PORT}`);
 });
